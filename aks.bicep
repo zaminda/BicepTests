@@ -31,23 +31,27 @@ resource aksCluster 'Microsoft.ContainerService/managedClusters@2021-03-01' = {
           '3'
         ]
       }
-      {
-        name: 'agentpool2'
-        count: 1
-        vmSize: 'Standard_b2s'
-        osType: 'Linux'
-        mode: 'User'
-        vnetSubnetID: vnet.outputs.subnetId
-        availabilityZones: [
-          '1'
-          '2'
-          '3'
-        ]
-      }
     ]
     networkProfile: {
       networkPlugin: 'azure'
       loadBalancerSku: 'standard'
     }
+  }
+}
+
+resource symbolicname 'Microsoft.ContainerService/managedClusters/agentPools@2022-03-01' = {
+  name: 'agnt2'
+  parent: aksCluster
+  properties: {
+    count: 1
+    vmSize: 'Standard_b2s'
+    osType: 'Linux'
+    mode: 'User'
+    vnetSubnetID: vnet.outputs.subnetId
+    availabilityZones: [
+      '1'
+      '2'
+      '3'
+    ]
   }
 }
