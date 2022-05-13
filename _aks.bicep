@@ -1,9 +1,11 @@
 param location string = resourceGroup().location
-param vnetSubnetID string
-@secure()
-param adminUsername string
-@secure()
-param adminPassword string
+
+module vnet 'vnet.bicep' = {
+  name: 'vnetDeploy'
+  params: {
+    location: location
+  }
+}
 
 resource aksCluster 'Microsoft.ContainerService/managedClusters@2021-03-01' = {
   name: 'aks-test-1'
@@ -16,8 +18,8 @@ resource aksCluster 'Microsoft.ContainerService/managedClusters@2021-03-01' = {
     dnsPrefix: 'dnsprefix'
     enableRBAC: true
     windowsProfile: {
-      adminUsername: adminUsername
-      adminPassword: adminPassword
+      adminUsername: 'azureuser'
+      adminPassword: 'myLJHLSIhldnldsngoldksgnklfng!'
       licenseType: 'Windows_Server'
     }
     agentPoolProfiles: [
@@ -27,7 +29,7 @@ resource aksCluster 'Microsoft.ContainerService/managedClusters@2021-03-01' = {
         vmSize: 'Standard_b2s'
         osType: 'Linux'
         mode: 'System'
-        vnetSubnetID: vnetSubnetID
+        vnetSubnetID: vnet.outputs.subnetId
         availabilityZones: [
           '1'
           '2'
@@ -42,22 +44,36 @@ resource aksCluster 'Microsoft.ContainerService/managedClusters@2021-03-01' = {
   }
 }
 
+// resource symbolicname 'Microsoft.ContainerService/managedClusters/agentPools@2022-03-01' = {
+//   name: 'win01'
+//   parent: aksCluster
+//   properties: {
+//     count: 1
+//     vmSize: 'Standard_b2s'
+//     osType: 'Windows'
+//     mode: 'User'
+//     vnetSubnetID: vnet.outputs.subnetId
+//     availabilityZones: [
+//       '1'
+//       '2'
+//       '3'
+//     ]
+//   }
+// }
+
 resource symbolicname 'Microsoft.ContainerService/managedClusters/agentPools@2022-03-01' = {
-  name: 'win01'
+  name: 'lin2'
   parent: aksCluster
   properties: {
-    count: 1
+    count: 2
     vmSize: 'Standard_b2s'
-    osType: 'Windows'
+    osType: 'Linux'
     mode: 'User'
-    vnetSubnetID: vnetSubnetID
+    vnetSubnetID: vnet.outputs.subnetId
     availabilityZones: [
       '1'
       '2'
       '3'
-      aksCluster.properties
     ]
   }
 }
-
-
